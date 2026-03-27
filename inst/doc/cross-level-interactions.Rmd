@@ -1,0 +1,173 @@
+---
+title: "Cross-Level Interaction Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cross-Level Interaction Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width  = 7,
+  fig.height = 4.5,
+  fig.align  = "center"
+)
+```
+
+## What is a cross-level interaction?
+
+A **cross-level interaction** occurs when a level-2 variable (e.g., school
+climate) moderates the relationship between a level-1 predictor (e.g., student
+SES) and the outcome (e.g., math achievement).
+
+Formally, the two-level model is:
+
+**Level 1:**
+$$math_{ij} = \beta_{0j} + \beta_{1j} \cdot SES_{ij} + e_{ij}$$
+
+**Level 2:**
+$$\beta_{0j} = \gamma_{00} + \gamma_{01} \cdot Climate_j + u_{0j}$$
+$$\beta_{1j} = \gamma_{10} + \gamma_{11} \cdot Climate_j + u_{1j}$$
+
+Substituting gives the composite model:
+$$math_{ij} = \gamma_{00} + \gamma_{10} SES_{ij} + \gamma_{01} Climate_j +
+  \gamma_{11} SES_{ij} \times Climate_j + u_{0j} + u_{1j} SES_{ij} + e_{ij}$$
+
+The term $\gamma_{11}$ is the **cross-level interaction**: it captures how
+much the SES slope varies as a function of school climate.
+
+## Setup
+
+```{r setup-pkg}
+library(mlmoderator)
+library(lme4)
+
+data(school_data)
+```
+
+## Centering strategy for cross-level interactions
+
+For cross-level interactions, the recommended centering strategy is:
+
+* **Level-1 predictor (SES):** group-mean center (within-school centering)
+* **Level-2 moderator (climate):** grand-mean center
+
+This separates within-school from between-school variance in SES, and makes
+the intercept interpretable as the school-average outcome at average climate.
+
+```{r centering}
+dat <- mlm_center(school_data,
+                  vars    = "ses",
+                  cluster = "school",
+                  type    = "group")   # within-school SES
+
+dat <- mlm_center(dat,
+                  vars = "climate",
+                  type = "grand")      # grand-mean-centred climate
+
+# Check
+cat("Within-school SES mean (should be ~0):", round(mean(dat$ses_c), 4), "\n")
+cat("Grand-mean climate (should be ~0):",     round(mean(dat$climate_c), 4), "\n")
+```
+
+## Fit the random-slopes model
+
+Because we hypothesise that the SES slope varies across schools (hence the
+cross-level interaction), we include a random slope for SES.
+
+```{r fit}
+mod <- lmer(
+  math ~ ses_c * climate_c + gender + (1 + ses_c | school),
+  data = dat,
+  REML = TRUE
+)
+summary(mod)
+```
+
+The `ses_c:climate_c` interaction is the cross-level interaction of interest.
+
+## Probe simple slopes
+
+```{r probe}
+probe <- mlm_probe(mod,
+                   pred        = "ses_c",
+                   modx        = "climate_c",
+                   modx.values = "mean-sd",
+                   conf.level  = 0.95)
+probe
+```
+
+**Interpretation:** At schools with above-average climate (+1 SD), the
+positive effect of SES on math is amplified.  At schools with below-average
+climate (−1 SD), the SES effect is weaker (and may not be significant).
+
+## Johnson–Neyman region
+
+The JN interval pinpoints the exact climate values where the SES effect
+transitions from non-significant to significant.
+
+```{r jn}
+jn <- mlm_jn(mod, pred = "ses_c", modx = "climate_c")
+jn
+```
+
+## Visualise
+
+```{r plot}
+mlm_plot(
+  mod,
+  pred         = "ses_c",
+  modx         = "climate_c",
+  modx.values  = "mean-sd",
+  interval     = TRUE,
+  x_label      = "Student SES (group-mean centred)",
+  y_label      = "Mathematics Achievement",
+  legend_title = "School Climate"
+)
+```
+
+## Full summary for reporting
+
+```{r summary}
+mlm_summary(mod,
+            pred        = "ses_c",
+            modx        = "climate_c",
+            modx.values = "mean-sd",
+            jn          = TRUE)
+```
+
+## Reporting guidance
+
+When reporting a cross-level interaction, include:
+
+1. **The interaction coefficient** — $\hat{\gamma}_{11}$, its SE, *t*-ratio,
+   and *p*-value.
+2. **Simple slopes** — the slope of the level-1 predictor at each chosen
+   level of the moderator, with 95% CIs.
+3. **The JN region** — the moderator value(s) at which the slope crosses
+   significance.
+4. **An interaction plot** — a figure showing predicted outcome lines across
+   the level-1 predictor for each selected moderator value.
+
+Example write-up:
+
+> *There was a significant cross-level interaction between student SES and
+> school climate, $\hat{\gamma}_{11}$ = [value], SE = [value], t([df]) =
+> [value], p = [value]. Simple slope analysis indicated that the positive
+> effect of SES on math achievement was significantly stronger at schools with
+> high climate (+1 SD: $b$ = [value], 95% CI [lo, hi]) than at schools with
+> low climate (−1 SD: $b$ = [value], 95% CI [lo, hi]).
+> Johnson–Neyman analysis revealed that the SES slope was statistically
+> significant for climate values above [JN boundary].*
+
+## Assumptions to check
+
+* **Random slope variance** — a non-trivial $\tau_{11}$ supports the rationale
+  for the cross-level interaction.
+* **Sufficient level-2 sample size** — cross-level interactions require at
+  least 30–50 level-2 units for stable estimation.
+* **Centering** — ensure level-1 predictors are group-mean centred if the
+  level-2 variable moderates the within-cluster slope.

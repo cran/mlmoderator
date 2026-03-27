@@ -1,0 +1,145 @@
+---
+title: "Getting Started with mlmoderator"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with mlmoderator}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width  = 7,
+  fig.height = 4.5,
+  fig.align  = "center"
+)
+```
+
+## Overview
+
+**mlmoderator** provides a unified workflow for probing, plotting, and interpreting
+multilevel interaction effects from mixed-effects models fitted with `lme4::lmer()`.
+
+The core workflow is:
+
+```r
+mod <- lmer(math ~ ses * climate + (1 + ses | school), data = dat)
+
+mlm_probe(mod, pred = "ses", modx = "climate")   # simple slopes
+mlm_jn(mod,    pred = "ses", modx = "climate")   # Johnson-Neyman region
+mlm_plot(mod,  pred = "ses", modx = "climate")   # interaction plot
+mlm_summary(mod, pred = "ses", modx = "climate") # full report
+```
+
+## The built-in dataset
+
+```{r load}
+library(mlmoderator)
+library(lme4)
+
+data(school_data)
+head(school_data)
+str(school_data)
+```
+
+`school_data` contains 3,000 students nested in 100 schools.  The outcome
+(`math`) was generated with a true cross-level interaction between student SES
+(`ses`) and school climate (`climate`).
+
+## Step 1: Center variables
+
+Before fitting, it is good practice to center predictors.  `mlm_center()`
+supports grand-mean centering, group-mean (within-cluster) centering, and a
+full within–between decomposition.
+
+```{r center}
+# Group-mean center SES within school
+dat <- mlm_center(school_data,
+                  vars    = "ses",
+                  cluster = "school",
+                  type    = "group")
+
+# Grand-mean center school climate (level-2 variable)
+dat <- mlm_center(dat,
+                  vars = "climate",
+                  type = "grand")
+
+head(dat[, c("school", "ses", "ses_c", "climate", "climate_c")])
+```
+
+## Step 2: Fit the model
+
+```{r model}
+mod <- lmer(math ~ ses_c * climate_c + gender + (1 + ses_c | school),
+            data = dat, REML = TRUE)
+summary(mod)
+```
+
+## Step 3: Probe simple slopes
+
+`mlm_probe()` computes the simple slope of the focal predictor (`ses_c`) at
+selected values of the moderator (`climate_c`).
+
+```{r probe}
+probe_out <- mlm_probe(mod, pred = "ses_c", modx = "climate_c")
+probe_out
+```
+
+By default, moderator values are set to −1 SD, Mean, and +1 SD.  Other
+options include `"quartiles"`, `"tertiles"`, or `"custom"` values via `at`.
+
+```{r probe-quartiles}
+mlm_probe(mod, pred = "ses_c", modx = "climate_c",
+          modx.values = "quartiles")
+```
+
+## Step 4: Johnson–Neyman interval
+
+The Johnson–Neyman (JN) interval identifies the exact moderator value(s) at
+which the simple slope of `ses_c` crosses the significance threshold.
+
+```{r jn}
+jn_out <- mlm_jn(mod, pred = "ses_c", modx = "climate_c")
+jn_out
+```
+
+## Step 5: Plot the interaction
+
+`mlm_plot()` returns a `ggplot` object, so it is fully customisable.
+
+```{r plot-basic}
+mlm_plot(mod, pred = "ses_c", modx = "climate_c")
+```
+
+Add confidence bands, raw data points, or custom labels:
+
+```{r plot-custom}
+mlm_plot(mod,
+         pred         = "ses_c",
+         modx         = "climate_c",
+         points       = TRUE,
+         point_alpha  = 0.2,
+         x_label      = "Student SES (group-mean centred)",
+         y_label      = "Mathematics Achievement",
+         legend_title = "School Climate")
+```
+
+## Step 6: Full summary report
+
+`mlm_summary()` combines the interaction coefficient, simple slopes, and
+JN region into a single printable object.
+
+```{r summary}
+mlm_summary(mod, pred = "ses_c", modx = "climate_c")
+```
+
+## Tips
+
+* Always center your predictors before fitting the model.  This makes the
+  simple slopes interpretable and reduces multicollinearity.
+* For cross-level interactions, group-mean-center the level-1 predictor and
+  grand-mean-center the level-2 moderator.
+* The `mlm_plot()` output is a `ggplot` — you can add `theme_*()`, `labs()`,
+  or any other `ggplot2` layer on top.

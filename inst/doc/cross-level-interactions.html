@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Cross-Level Interaction Workflow</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Cross-Level Interaction Workflow</h1>
+
+
+
+<div id="what-is-a-cross-level-interaction" class="section level2">
+<h2>What is a cross-level interaction?</h2>
+<p>A <strong>cross-level interaction</strong> occurs when a level-2
+variable (e.g., school climate) moderates the relationship between a
+level-1 predictor (e.g., student SES) and the outcome (e.g., math
+achievement).</p>
+<p>Formally, the two-level model is:</p>
+<p><strong>Level 1:</strong> <span class="math display">\[math_{ij} =
+\beta_{0j} + \beta_{1j} \cdot SES_{ij} + e_{ij}\]</span></p>
+<p><strong>Level 2:</strong> <span class="math display">\[\beta_{0j} =
+\gamma_{00} + \gamma_{01} \cdot Climate_j + u_{0j}\]</span> <span class="math display">\[\beta_{1j} = \gamma_{10} + \gamma_{11} \cdot
+Climate_j + u_{1j}\]</span></p>
+<p>Substituting gives the composite model: <span class="math display">\[math_{ij} = \gamma_{00} + \gamma_{10} SES_{ij} +
+\gamma_{01} Climate_j +
+  \gamma_{11} SES_{ij} \times Climate_j + u_{0j} + u_{1j} SES_{ij} +
+e_{ij}\]</span></p>
+<p>The term <span class="math inline">\(\gamma_{11}\)</span> is the
+<strong>cross-level interaction</strong>: it captures how much the SES
+slope varies as a function of school climate.</p>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(mlmoderator)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;lme4&#39; was built under R version 4.5.2</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; Loading required package: Matrix</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;Matrix&#39; was built under R version 4.5.2</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">data</span>(school_data)</span></code></pre></div>
+</div>
+<div id="centering-strategy-for-cross-level-interactions" class="section level2">
+<h2>Centering strategy for cross-level interactions</h2>
+<p>For cross-level interactions, the recommended centering strategy
+is:</p>
+<ul>
+<li><strong>Level-1 predictor (SES):</strong> group-mean center
+(within-school centering)</li>
+<li><strong>Level-2 moderator (climate):</strong> grand-mean center</li>
+</ul>
+<p>This separates within-school from between-school variance in SES, and
+makes the intercept interpretable as the school-average outcome at
+average climate.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">mlm_center</span>(school_data,</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                  <span class="at">vars    =</span> <span class="st">&quot;ses&quot;</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                  <span class="at">cluster =</span> <span class="st">&quot;school&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>                  <span class="at">type    =</span> <span class="st">&quot;group&quot;</span>)   <span class="co"># within-school SES</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">mlm_center</span>(dat,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>                  <span class="at">vars =</span> <span class="st">&quot;climate&quot;</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>                  <span class="at">type =</span> <span class="st">&quot;grand&quot;</span>)      <span class="co"># grand-mean-centred climate</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Check</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Within-school SES mean (should be ~0):&quot;</span>, <span class="fu">round</span>(<span class="fu">mean</span>(dat<span class="sc">$</span>ses_c), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; Within-school SES mean (should be ~0): 0</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Grand-mean climate (should be ~0):&quot;</span>,     <span class="fu">round</span>(<span class="fu">mean</span>(dat<span class="sc">$</span>climate_c), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; Grand-mean climate (should be ~0): 0</span></span></code></pre></div>
+</div>
+<div id="fit-the-random-slopes-model" class="section level2">
+<h2>Fit the random-slopes model</h2>
+<p>Because we hypothesise that the SES slope varies across schools
+(hence the cross-level interaction), we include a random slope for
+SES.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  math <span class="sc">~</span> ses_c <span class="sc">*</span> climate_c <span class="sc">+</span> gender <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> ses_c <span class="sc">|</span> school),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="at">REML =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">summary</span>(mod)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; Linear mixed model fit by REML [&#39;lmerMod&#39;]</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; Formula: math ~ ses_c * climate_c + gender + (1 + ses_c | school)</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt;    Data: dat</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; REML criterion at convergence: 18414.9</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; Scaled residuals: </span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; -3.7607 -0.6591 -0.0070  0.6580  3.1325 </span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; Random effects:</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  Groups   Name        Variance Std.Dev. Corr  </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;  school   (Intercept)  7.841   2.8002         </span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;           ses_c        0.168   0.4099   -0.28 </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  Residual             24.916   4.9916         </span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; Number of obs: 3000, groups:  school, 100</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Fixed effects:</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt;                 Estimate Std. Error t value</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; (Intercept)     49.84009    0.30871 161.446</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; ses_c            1.42623    0.10133  14.075</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; climate_c        1.01234    0.28421   3.562</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; gendermale       0.07486    0.18608   0.402</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; ses_c:climate_c  0.46554    0.09932   4.687</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; Correlation of Fixed Effects:</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt;             (Intr) ses_c  clmt_c gndrml</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; ses_c       -0.105                     </span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; climate_c   -0.002  0.000              </span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; gendermale  -0.300  0.012  0.007       </span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co">#&gt; ss_c:clmt_c  0.001 -0.009 -0.105 -0.005</span></span></code></pre></div>
+<p>The <code>ses_c:climate_c</code> interaction is the cross-level
+interaction of interest.</p>
+</div>
+<div id="probe-simple-slopes" class="section level2">
+<h2>Probe simple slopes</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>probe <span class="ot">&lt;-</span> <span class="fu">mlm_probe</span>(mod,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                   <span class="at">pred        =</span> <span class="st">&quot;ses_c&quot;</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                   <span class="at">modx        =</span> <span class="st">&quot;climate_c&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                   <span class="at">modx.values =</span> <span class="st">&quot;mean-sd&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                   <span class="at">conf.level  =</span> <span class="fl">0.95</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>probe</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; --- Simple Slopes: mlm_probe ---</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Focal predictor : ses_c </span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; Moderator       : climate_c </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; Confidence level: 0.95 </span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;  climate_c slope    se      t   df      p ci_lower ci_upper</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;     -1.036 0.944 0.145  6.504 2995 &lt; .001    0.659    1.228</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;      0.000 1.426 0.101 14.075 2995 &lt; .001    1.228    1.625</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;      1.036 1.909 0.144 13.277 2995 &lt; .001    1.627    2.191</span></span></code></pre></div>
+<p><strong>Interpretation:</strong> At schools with above-average
+climate (+1 SD), the positive effect of SES on math is amplified. At
+schools with below-average climate (−1 SD), the SES effect is weaker
+(and may not be significant).</p>
+</div>
+<div id="johnsonneyman-region" class="section level2">
+<h2>Johnson–Neyman region</h2>
+<p>The JN interval pinpoints the exact climate values where the SES
+effect transitions from non-significant to significant.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>jn <span class="ot">&lt;-</span> <span class="fu">mlm_jn</span>(mod, <span class="at">pred =</span> <span class="st">&quot;ses_c&quot;</span>, <span class="at">modx =</span> <span class="st">&quot;climate_c&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>jn</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; --- Johnson-Neyman Interval: mlm_jn ---</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; Focal predictor : ses_c </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Moderator       : climate_c </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; Alpha           : 0.05 </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; Moderator range : -3.026 to 2.254 </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; Johnson-Neyman boundary/boundaries ( climate_c ):</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;    -2.088 </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; Interpretation: The simple slope of &#39;ses_c&#39; is statistically</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; significant (p &lt; 0.05) for values of &#39;climate_c&#39;</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;   between -2.07 and 2.254.</span></span></code></pre></div>
+</div>
+<div id="visualise" class="section level2">
+<h2>Visualise</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">mlm_plot</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  mod,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">pred         =</span> <span class="st">&quot;ses_c&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">modx         =</span> <span class="st">&quot;climate_c&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">modx.values  =</span> <span class="st">&quot;mean-sd&quot;</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">interval     =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">x_label      =</span> <span class="st">&quot;Student SES (group-mean centred)&quot;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">y_label      =</span> <span class="st">&quot;Mathematics Achievement&quot;</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">legend_title =</span> <span class="st">&quot;School Climate&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>)</span></code></pre></div>
+<p><img role="img" aria-label src="data:image/png;base64,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" alt style="display: block; margin: auto;" /></p>
+</div>
+<div id="full-summary-for-reporting" class="section level2">
+<h2>Full summary for reporting</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">mlm_summary</span>(mod,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>            <span class="at">pred        =</span> <span class="st">&quot;ses_c&quot;</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>            <span class="at">modx        =</span> <span class="st">&quot;climate_c&quot;</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>            <span class="at">modx.values =</span> <span class="st">&quot;mean-sd&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>            <span class="at">jn          =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; ========================================</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt;   Multilevel Moderation Summary</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; ========================================</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; Focal predictor : ses_c </span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; Moderator       : climate_c </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Confidence level: 0.95 </span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; --- Interaction Term ---</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;   ses_c:climate_c               b =   0.466  SE =  0.099  t(2995) =  4.687  p = &lt; .001  [0.271, 0.66]</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; --- Simple Slopes ---</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt;   climate_c      slope        se         t        df         p  95% CI lo  95% CI hi </span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; ------------------------------------------------------------------------------------ </span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;   -1.036         0.944     0.145     6.504    2995.0    &lt; .001     0.659     1.228</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;   0.000          1.426     0.101    14.075    2995.0    &lt; .001     1.228     1.625</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;   1.036          1.909     0.144    13.277    2995.0    &lt; .001     1.627     2.191</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; --- Johnson-Neyman Region ---</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;   JN boundary/boundaries for &#39;climate_c&#39;: -2.088</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; ========================================</span></span></code></pre></div>
+</div>
+<div id="reporting-guidance" class="section level2">
+<h2>Reporting guidance</h2>
+<p>When reporting a cross-level interaction, include:</p>
+<ol style="list-style-type: decimal">
+<li><strong>The interaction coefficient</strong> — <span class="math inline">\(\hat{\gamma}_{11}\)</span>, its SE,
+<em>t</em>-ratio, and <em>p</em>-value.</li>
+<li><strong>Simple slopes</strong> — the slope of the level-1 predictor
+at each chosen level of the moderator, with 95% CIs.</li>
+<li><strong>The JN region</strong> — the moderator value(s) at which the
+slope crosses significance.</li>
+<li><strong>An interaction plot</strong> — a figure showing predicted
+outcome lines across the level-1 predictor for each selected moderator
+value.</li>
+</ol>
+<p>Example write-up:</p>
+<blockquote>
+<p><em>There was a significant cross-level interaction between student
+SES and school climate, <span class="math inline">\(\hat{\gamma}_{11}\)</span> = [value], SE =
+[value], t([df]) = [value], p = [value]. Simple slope analysis indicated
+that the positive effect of SES on math achievement was significantly
+stronger at schools with high climate (+1 SD: <span class="math inline">\(b\)</span> = [value], 95% CI [lo, hi]) than at
+schools with low climate (−1 SD: <span class="math inline">\(b\)</span>
+= [value], 95% CI [lo, hi]). Johnson–Neyman analysis revealed that the
+SES slope was statistically significant for climate values above [JN
+boundary].</em></p>
+</blockquote>
+</div>
+<div id="assumptions-to-check" class="section level2">
+<h2>Assumptions to check</h2>
+<ul>
+<li><strong>Random slope variance</strong> — a non-trivial <span class="math inline">\(\tau_{11}\)</span> supports the rationale for the
+cross-level interaction.</li>
+<li><strong>Sufficient level-2 sample size</strong> — cross-level
+interactions require at least 30–50 level-2 units for stable
+estimation.</li>
+<li><strong>Centering</strong> — ensure level-1 predictors are
+group-mean centred if the level-2 variable moderates the within-cluster
+slope.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
